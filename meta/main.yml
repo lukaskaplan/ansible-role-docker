@@ -2,19 +2,18 @@ galaxy_info:
   role_name: docker
   namespace: lukaskaplan
   author: lukaskaplan
-  description: Install Docker on Linux.
+  description: Ansible role for setting up docker
+  issue_tracker_url: https://github.com/lukaskaplan/ansible-role-docker/issues
   company: ""
   license: MIT
   min_ansible_version: "2.18"
+
   platforms:
     - name: Debian
       versions:
         - buster
         - bullseye
         - bookworm
-
-  # If this a Container Enabled role, provide the minimum Ansible Container version.
-  # min_ansible_container_version:
 
   galaxy_tags:
     - containers

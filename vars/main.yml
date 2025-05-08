@@ -1,2 +1,2 @@
 ---
-# vars file for docker_install
+# vars/main.yml file for role: docker
