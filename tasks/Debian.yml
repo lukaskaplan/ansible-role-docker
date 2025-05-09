@@ -30,10 +30,23 @@
     dest: /etc/apt/keyrings/docker.asc
     mode: '0644'
 
+- name: Get Debian architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: dpkg_arch
+  changed_when: false
+
+- name: Set apt_architecture fact
+  ansible.builtin.set_fact:
+    apt_architecture: "{{ dpkg_arch.stdout }}"
+
+# - name: Debug apt_architecture fact
+#   debug:
+#     var: apt_architecture
+
 - name: Docker | Pridat docker repozitar
   ansible.builtin.apt_repository:
     repo: >
-      deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc]
+      deb [arch={{ apt_architecture }} signed-by=/etc/apt/keyrings/docker.asc]
       https://download.docker.com/linux/debian
       {{ ansible_distribution_release }} stable
     state: present
