@@ -43,7 +43,7 @@
 #   debug:
 #     var: apt_architecture
 
-- name: Docker | Pridat docker repozitar
+- name: Add docker repository
   ansible.builtin.apt_repository:
     repo: >
       deb [arch={{ apt_architecture }} signed-by=/etc/apt/keyrings/docker.asc]
@@ -52,7 +52,7 @@
     state: present
     filename: docker
 
-- name: Docker | Instalace
+- name: Install required packages
   ansible.builtin.apt:
     pkg:
       - docker-ce
