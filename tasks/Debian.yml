@@ -18,18 +18,6 @@
       - podman-docker
     state: absent
 
-- name: Create /etc/apt/keyrings directory with correct permissions
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
-
-- name: Download Docker GPG key
-  ansible.builtin.get_url:
-    url: https://download.docker.com/linux/debian/gpg
-    dest: /etc/apt/keyrings/docker.asc
-    mode: '0644'
-
 - name: Get Debian architecture
   ansible.builtin.command: dpkg --print-architecture
   register: dpkg_arch
@@ -43,14 +31,43 @@
 #   debug:
 #     var: apt_architecture
 
-- name: Add docker repository
-  ansible.builtin.apt_repository:
-    repo: >
-      deb [arch={{ apt_architecture }} signed-by=/etc/apt/keyrings/docker.asc]
-      https://download.docker.com/linux/debian
-      {{ ansible_distribution_release }} stable
+
+- name: Add docker repository (Debian <= 12)
+  when: ansible_distribution_major_version | int <= 12
+  block:
+    - name: Create /etc/apt/keyrings directory with correct permissions
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Add docker repository
+      ansible.builtin.apt_repository:
+        repo: >
+          deb [arch={{ apt_architecture }} signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/debian
+          {{ ansible_distribution_release }} stable
+        state: present
+        filename: docker
+
+- name: Add Docker repository (Debian > 12)
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: "https://download.docker.com/linux/debian"
+    architectures: "{{ apt_architecture }}"
+    suites: "{{ ansible_distribution_release }}"
+    components: stable
+    signed_by: https://download.docker.com/linux/debian/gpg
     state: present
-    filename: docker
+    enabled: true
+  when: ansible_distribution_major_version | int > 12
 
 - name: Install required packages
   ansible.builtin.apt:
