@@ -31,9 +31,8 @@
 #   debug:
 #     var: apt_architecture
 
-
 - name: Add docker repository (Debian <= 12)
-  when: ansible_distribution_major_version | int <= 12
+  when: ansible_facts['distribution_major_version'] | int <= 12
   block:
     - name: Create /etc/apt/keyrings directory with correct permissions
       ansible.builtin.file:
@@ -52,7 +51,7 @@
         repo: >
           deb [arch={{ apt_architecture }} signed-by=/etc/apt/keyrings/docker.asc]
           https://download.docker.com/linux/debian
-          {{ ansible_distribution_release }} stable
+          {{ ansible_facts['distribution_release'] }} stable
         state: present
         filename: docker
 
@@ -62,12 +61,12 @@
     types: deb
     uris: "https://download.docker.com/linux/debian"
     architectures: "{{ apt_architecture }}"
-    suites: "{{ ansible_distribution_release }}"
+    suites: "{{ ansible_facts['distribution_release'] }}"
     components: stable
     signed_by: https://download.docker.com/linux/debian/gpg
     state: present
     enabled: true
-  when: ansible_distribution_major_version | int > 12
+  when: ansible_facts['distribution_major_version'] | int > 12
 
 - name: Install required packages
   ansible.builtin.apt:
