@@ -1,5 +1,5 @@
 ---
-- name: Install required packages
+- name: Install prerequisite packages
   ansible.builtin.apt:
     pkg:
       - ca-certificates
@@ -13,15 +13,19 @@
   ansible.builtin.apt:
     pkg:
       - docker.io
-      - docker-compose
       - docker-doc
+      - docker-compose
+      - docker-compose-v2
       - podman-docker
+      - containerd
+      - runc
     state: absent
 
 - name: Get Debian architecture
   ansible.builtin.command: dpkg --print-architecture
   register: dpkg_arch
   changed_when: false
+  check_mode: false
 
 - name: Set apt_architecture fact
   ansible.builtin.set_fact:
@@ -68,7 +72,7 @@
     enabled: true
   when: ansible_facts['distribution_major_version'] | int > 12
 
-- name: Install required packages
+- name: Install docker packages
   ansible.builtin.apt:
     pkg:
       - docker-ce
@@ -80,9 +84,9 @@
     update_cache: true
     state: present
 
-- name: Copy daemon.json.file
+- name: Copy daemon.json file
   ansible.builtin.copy:
-    src: files/daemon.json
+    src: daemon.json
     dest: /etc/docker/daemon.json
     mode: '0644'
   notify: Restart docker
